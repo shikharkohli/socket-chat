@@ -1,0 +1,101 @@
+<!doctype html>
+<html>
+  <head>
+    <title>My chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      #aButton, #m{
+        position: fixed;
+        bottom: 5px;
+        cursor: pointer;
+        z-index: -1;
+      }
+      #m {
+        width : 90%;
+      }
+      #aButton{
+        right: 5px;
+        z-index:1;
+      }
+
+      #userData
+      {
+        position:absolute;
+        top: 50%;
+        left: 50%;
+        z-index:1;
+        z-index: 11;
+      }
+      #overlay
+      {
+        position:fixed;
+        height:100%;
+        width:100%;
+        opacity: 0.5;
+        z-index: 10;
+        background-color: red;
+      }
+
+    </style>
+
+<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+<script src="http://requirejs.org/docs/release/2.1.18/minified/require.js"></script>
+
+<script>
+  var socket = io('http://localhost:3000');
+var userName = '';
+  $(document).ready(function() {
+          
+          $("#userNameButton").click(function()
+          {
+              userName = $("#userName").val();
+              $("#userData").fadeOut();
+              $("#overlay").fadeOut();
+              $("#m").show();
+              $("#aButton").show();
+          });
+
+          socket.emit('initialized', 'initialized');
+
+          $("#aButton").click(function() {
+
+              var sendMe = {
+                userName : userName,
+                msg : $("#m").val()
+              }
+              socket.emit('x', sendMe);
+              $("#m").val('');
+          });
+
+          socket.on('x', function(msg) {
+           $('#messages').append("<li>" + msg.userName + " : " + msg.msg + '</li>');
+           $("li:odd").css("background-color","silver");
+
+          });
+
+  });
+
+  $(window).unload(function ()
+  {
+    debugger;
+    var socket = io("http://localhost:3000");
+    userNameX = userName;
+    socket.emit('x', {userName : userNameX, msg : 'disconnecting'});
+  });
+</script>
+  </head>
+
+
+  <body>
+    <div id="overlay"></div>
+    <div id="userData">
+      <input id="userName" placeholder="Enter user name here"/>
+       <input id="userNameButton" type="button" value="Click"/>
+   </div>
+    <ul id="messages"></ul>
+      <input id="m" autocomplete="off" />
+      <input type="button" value="Send" id='aButton'></button>
+  </body>
+</html>
